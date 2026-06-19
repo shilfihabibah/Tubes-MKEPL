@@ -1,0 +1,66 @@
+name: CI/CD Pipeline Tugas Besar PL-SCD
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  # 1. Continuous Integration
+  continuous-integration:
+    name: Build Application (CI)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+          
+      - name: Compile Maven Project
+        run: mvn clean compile
+
+  # 2. Continuous Testing
+  continuous-testing:
+    name: Run Unit Tests (CT)
+    needs: continuous-integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        
+      # TODO: Tambahkan setup JDK 17 dan jalankan unit test (contoh: mvn test)
+      - name: Run Tests
+        run: echo "Menunggu implementasi Continuous Testing..."
+
+  # 3. Continuous Inspection
+  continuous-inspection:
+    name: Code Quality Check
+    needs: continuous-integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        
+      # TODO: Tambahkan setup JDK 17 dan jalankan inspeksi kode (contoh: mvn checkstyle:checkstyle)
+      - name: Run Code Inspection
+        run: echo "Menunggu implementasi Continuous Inspection..."
+
+  # 4. Continuous Deployment
+  continuous-deployment:
+    name: Create GitHub Release (CD)
+    needs: [continuous-testing, continuous-inspection]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+        
+      # TODO: Build file .jar dan otomatisasi upload ke GitHub Releases
+      - name: Publish Release
+        run: echo "Menunggu implementasi Continuous Deployment..."
