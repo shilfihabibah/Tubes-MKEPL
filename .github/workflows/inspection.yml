@@ -1,0 +1,45 @@
+name: Continuous Inspection
+
+# Workflow ini akan otomatis berjalan setiap ada yang melakukan push atau pull request ke branch main
+on:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  inspect-code:
+    name: Code Quality Check (PMD)
+    runs-on: ubuntu-latest
+
+    steps:
+      # Langkah 1: Mengambil kode dari repository GitHub
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # Langkah 2: Menyiapkan Java versi 17
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+
+      # Langkah 3: Menjalankan Inspeksi Kode menggunakan PMD
+      # PMD akan mencari "code smell", variabel tak terpakai, atau penulisan kode yang kurang rapi
+      - name: Run PMD Code Analyzer
+        uses: pmd/pmd-github-action@v2
+        with:
+          # Menggunakan aturan standar untuk Java
+          rulesets: 'rulesets/java/quickstart.xml'
+          # Secara spesifik hanya mengecek folder source code, bukan folder test
+          sourcePath: 'src/main/java'
+          analyzeModifiedFilesOnly: false
+
+      # Langkah 4: Menyimpan laporan jika ditemukan kesalahan agar bisa dibaca
+      - name: Upload PMD Report
+        uses: actions/upload-artifact@v4
+        if: always() # Memastikan laporan tetap diunggah meskipun ada kode yang tidak lolos inspeksi
+        with:
+          name: pmd-report
+          path: pmd-report.txt
