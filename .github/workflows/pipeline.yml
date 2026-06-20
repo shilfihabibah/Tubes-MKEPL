@@ -78,28 +78,26 @@ jobs:
     needs: [continuous-testing, continuous-inspection]
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-    steps:
+    
+    permissions:
+      contents: read
+      packages: write
+    
+steps:
       - name: Checkout Code
         uses: actions/checkout@v3
         
-      # 1. Setup Java Environment
-      - name: Set up JDK 11
+      - name: Set up JDK 17 dan Konfigurasi Maven Settings
         uses: actions/setup-java@v3
         with:
-          java-version: '11' 
+          java-version: '17' 
           distribution: 'temurin'
           cache: maven
+          server-id: github 
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
 
-      # 2. Build file .jar menggunakan Maven
-      - name: Build JAR with Maven
-        run: mvn clean package -DskipTests 
-
-      # 3. Membuat GitHub Release dan mengunggah file .jar otomatis
-      - name: Publish GitHub Release
-        uses: softprops/action-gh-release@v1
-        with:
-          tag_name: v1.0.${{ github.run_number }} 
-          name: Release v1.0.${{ github.run_number }}
-          files: target/*.jar 
+      - name: Publish to GitHub Packages
+        run: mvn deploy -DskipTests 
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
